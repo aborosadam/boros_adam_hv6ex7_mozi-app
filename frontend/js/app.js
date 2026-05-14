@@ -29,15 +29,13 @@ function showPage(pageId) {
 
   if (pageId === 'movies') loadMovies();
   if (pageId === 'bookings') loadMyBookings();
+  if (pageId === 'admin') loadAdminPanel();
 }
 
 document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
   btn.addEventListener('click', () => {
     const page = btn.dataset.page;
-    if (page === 'bookings' && !currentUser) {
-      showPage('login');
-      return;
-    }
+    if (page === 'bookings' && !currentUser) { showPage('login'); return; }
     showPage(page);
   });
 });
@@ -49,15 +47,19 @@ function updateNavbar() {
       <div class="user-bar">
         <div class="user-avatar">${currentUser.username[0].toUpperCase()}</div>
         <span>${currentUser.username}</span>
-        <button class="nav-btn" id="btn-bookings-nav" data-page="bookings">Foglalásaim</button>
+        <button class="nav-btn" id="btn-bookings-nav">Foglalásaim</button>
+        ${currentUser.role === 'admin' ? '<button class="nav-btn" id="btn-admin-nav">Admin panel</button>' : ''}
         <button class="nav-btn" id="btn-logout">Kilépés</button>
       </div>`;
     document.getElementById('btn-logout').addEventListener('click', logout);
     document.getElementById('btn-bookings-nav').addEventListener('click', () => showPage('bookings'));
+    if (currentUser.role === 'admin') {
+      document.getElementById('btn-admin-nav').addEventListener('click', () => showPage('admin'));
+    }
   } else {
     authArea.innerHTML = `
-      <button class="nav-btn" data-page="login" id="btn-login-nav">Bejelentkezés</button>
-      <button class="nav-btn primary" data-page="register" id="btn-register-nav">Regisztráció</button>`;
+      <button class="nav-btn" id="btn-login-nav">Bejelentkezés</button>
+      <button class="nav-btn primary" id="btn-register-nav">Regisztráció</button>`;
     document.getElementById('btn-login-nav').addEventListener('click', () => showPage('login'));
     document.getElementById('btn-register-nav').addEventListener('click', () => showPage('register'));
   }
@@ -99,13 +101,11 @@ window.showMovieDetail = async function(movieId) {
   const page = document.getElementById('page-detail');
   const content = document.getElementById('movie-detail-content');
   content.innerHTML = '<div class="spinner"></div>';
-
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   page.classList.add('active');
 
   try {
     const movie = await api.get(`/movies/${movieId}`);
-
     const screeningRows = movie.screenings.length === 0
       ? '<p style="color:var(--text-muted)">Nincs közelgő vetítés</p>'
       : movie.screenings.map(s => {
@@ -126,9 +126,7 @@ window.showMovieDetail = async function(movieId) {
                 </div>
                 <div class="seats-label">szabad hely</div>
               </div>
-              <div>
-                <div class="price-tag">${s.price.toLocaleString('hu-HU')} Ft</div>
-              </div>
+              <div><div class="price-tag">${s.price.toLocaleString('hu-HU')} Ft</div></div>
               <button class="btn btn-primary" ${full ? 'disabled' : ''}
                 onclick="openSeatPicker(${s.id}, '${movie.title}', ${s.total_seats}, ${s.price})">
                 ${full ? 'Telt ház' : 'Jegyvásárlás'}
@@ -140,8 +138,7 @@ window.showMovieDetail = async function(movieId) {
     content.innerHTML = `
       <button class="btn btn-secondary" style="margin-bottom:20px" onclick="showPage('movies')">← Vissza</button>
       <div class="movie-detail-header">
-        <img src="${movie.poster_url || ''}" alt="${movie.title}"
-          onerror="this.style.display='none'">
+        <img src="${movie.poster_url || ''}" alt="${movie.title}" onerror="this.style.display='none'">
         <div class="movie-detail-info">
           <h2>${movie.title}</h2>
           <div class="meta">
@@ -162,23 +159,19 @@ window.showMovieDetail = async function(movieId) {
 
 window.openSeatPicker = async function(screeningId, movieTitle, totalSeats, price) {
   if (!currentUser) {
-    showAlert('login', 'Jegyvásárláshoz be kell jelentkezni!', 'error');
     showPage('login');
     return;
   }
-
   selectedSeats = [];
   currentScreening = { id: screeningId, price, totalSeats };
-
   const overlay = document.getElementById('seat-picker-overlay');
   overlay.style.display = 'flex';
-
   document.getElementById('seat-picker-title').textContent = movieTitle;
+  document.getElementById('seat-picker-error').style.display = 'none';
 
   try {
     const screening = await api.get(`/screenings/${screeningId}`);
-    const takenSeats = screening.taken_seats || [];
-    renderSeats(totalSeats, takenSeats, price);
+    renderSeats(totalSeats, screening.taken_seats || [], price);
   } catch (e) {
     closeSeatPicker();
     alert('Hiba a vetítés betöltésekor: ' + e.message);
@@ -193,9 +186,7 @@ function renderSeats(total, taken, price) {
     seat.className = 'seat' + (taken.includes(i) ? ' taken' : '');
     seat.textContent = i;
     seat.dataset.seat = i;
-    if (!taken.includes(i)) {
-      seat.addEventListener('click', () => toggleSeat(i, price));
-    }
+    if (!taken.includes(i)) seat.addEventListener('click', () => toggleSeat(i, price));
     grid.appendChild(seat);
   }
   updateSummary(price);
@@ -217,9 +208,8 @@ function toggleSeat(seatNum, price) {
 
 function updateSummary(price) {
   const count = selectedSeats.length;
-  const total = count * price;
   document.getElementById('selected-count').textContent = count + ' db';
-  document.getElementById('total-price').textContent = total.toLocaleString('hu-HU') + ' Ft';
+  document.getElementById('total-price').textContent = (count * price).toLocaleString('hu-HU') + ' Ft';
   document.getElementById('seats-list').textContent = count > 0 ? selectedSeats.sort((a,b)=>a-b).join(', ') : '–';
   document.getElementById('confirm-booking-btn').disabled = count === 0;
 }
@@ -235,12 +225,8 @@ document.getElementById('confirm-booking-btn').addEventListener('click', async (
   const btn = document.getElementById('confirm-booking-btn');
   btn.disabled = true;
   btn.textContent = 'Foglalás...';
-
   try {
-    await api.post('/bookings', {
-      screening_id: currentScreening.id,
-      seat_numbers: selectedSeats
-    });
+    await api.post('/bookings', { screening_id: currentScreening.id, seat_numbers: selectedSeats });
     closeSeatPicker();
     showPage('bookings');
     showAlert('bookings', `Sikeres foglalás! ${selectedSeats.length} jegy lefoglalva.`, 'success');
@@ -298,14 +284,125 @@ window.cancelBooking = async function(bookingId) {
   }
 };
 
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  clearAlert('login');
+async function loadAdminPanel() {
+  if (!currentUser || currentUser.role !== 'admin') { showPage('movies'); return; }
+  const container = document.getElementById('admin-content');
+  container.innerHTML = '<div class="spinner"></div>';
+  try {
+    const movies = await api.get('/movies');
+    container.innerHTML = `
+      <div class="admin-section">
+        <h3>Film hozzáadása</h3>
+        <div class="admin-form">
+          <input type="text" id="add-title" placeholder="Film címe *">
+          <input type="text" id="add-genre" placeholder="Műfaj">
+          <input type="number" id="add-duration" placeholder="Hossz (perc)">
+          <input type="text" id="add-poster" placeholder="Plakát URL">
+          <textarea id="add-desc" placeholder="Leírás" rows="3"></textarea>
+          <button class="btn btn-primary" onclick="adminAddMovie()">Film hozzáadása</button>
+        </div>
+        <div id="admin-movie-alert"></div>
+      </div>
+
+      <div class="admin-section">
+        <h3>Filmek kezelése</h3>
+        <div class="admin-movies-list">
+          ${movies.map(m => `
+            <div class="admin-movie-item">
+              <div>
+                <strong>${m.title}</strong>
+                <span style="color:var(--text-muted);font-size:0.85rem;margin-left:8px">${m.genre || ''} ${m.duration_min ? '· ' + m.duration_min + ' perc' : ''}</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn btn-secondary" style="font-size:0.8rem;padding:6px 12px" onclick="showAddScreening(${m.id}, '${m.title.replace(/'/g, "\\'")}')">+ Vetítés</button>
+                <button class="btn btn-danger" style="font-size:0.8rem;padding:6px 12px" onclick="adminDeleteMovie(${m.id}, '${m.title.replace(/'/g, "\\'")}')">Törlés</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+  } catch (e) {
+    container.innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+window.adminAddMovie = async function() {
+  const title = document.getElementById('add-title').value.trim();
+  if (!title) { showAlert('admin-movie', 'A film címe kötelező', 'error'); return; }
 
   try {
-    const data = await api.post('/auth/login', { email, password });
+    await api.post('/movies', {
+      title,
+      genre: document.getElementById('add-genre').value,
+      duration_min: parseInt(document.getElementById('add-duration').value) || null,
+      poster_url: document.getElementById('add-poster').value,
+      description: document.getElementById('add-desc').value
+    });
+    showAlert('admin-movie', 'Film sikeresen hozzáadva!', 'success');
+    loadAdminPanel();
+  } catch (e) {
+    showAlert('admin-movie', e.message, 'error');
+  }
+};
+
+window.adminDeleteMovie = async function(movieId, title) {
+  if (!confirm(`Biztosan törlöd a "${title}" filmet? Az összes vetítése is törlődik!`)) return;
+  try {
+    await api.delete(`/movies/${movieId}`);
+    loadAdminPanel();
+  } catch (e) {
+    alert('Hiba: ' + e.message);
+  }
+};
+
+window.showAddScreening = function(movieId, movieTitle) {
+  const existing = document.getElementById('screening-form-' + movieId);
+  if (existing) { existing.remove(); return; }
+
+  const item = document.querySelector(`.admin-movie-item:has(button[onclick*="showAddScreening(${movieId}"])`);
+  if (!item) return;
+
+  const form = document.createElement('div');
+  form.id = 'screening-form-' + movieId;
+  form.className = 'screening-add-form';
+  form.innerHTML = `
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:10px">Új vetítés: <strong>${movieTitle}</strong></p>
+    <input type="datetime-local" id="sc-time-${movieId}">
+    <input type="text" id="sc-hall-${movieId}" placeholder="Terem neve *">
+    <input type="number" id="sc-seats-${movieId}" placeholder="Helyek száma" value="80">
+    <input type="number" id="sc-price-${movieId}" placeholder="Jegyár (Ft)" value="1800">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-primary" style="font-size:0.85rem" onclick="adminAddScreening(${movieId})">Mentés</button>
+      <button class="btn btn-secondary" style="font-size:0.85rem" onclick="document.getElementById('screening-form-${movieId}').remove()">Mégse</button>
+    </div>`;
+  item.insertAdjacentElement('afterend', form);
+};
+
+window.adminAddScreening = async function(movieId) {
+  const time = document.getElementById(`sc-time-${movieId}`).value;
+  const hall = document.getElementById(`sc-hall-${movieId}`).value;
+  const seats = parseInt(document.getElementById(`sc-seats-${movieId}`).value);
+  const price = parseInt(document.getElementById(`sc-price-${movieId}`).value);
+
+  if (!time || !hall) { alert('Az időpont és a terem neve kötelező!'); return; }
+
+  try {
+    await api.post('/screenings', { movie_id: movieId, screening_time: time, hall, total_seats: seats, price });
+    document.getElementById('screening-form-' + movieId)?.remove();
+    alert('Vetítés sikeresen hozzáadva!');
+  } catch (e) {
+    alert('Hiba: ' + e.message);
+  }
+};
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearAlert('login');
+  try {
+    const data = await api.post('/auth/login', {
+      email: document.getElementById('login-email').value,
+      password: document.getElementById('login-password').value
+    });
     setToken(data.token);
     currentUser = data.user;
     setUser(data.user);
@@ -318,13 +415,13 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const username = document.getElementById('reg-username').value;
-  const email = document.getElementById('reg-email').value;
-  const password = document.getElementById('reg-password').value;
   clearAlert('register');
-
   try {
-    const data = await api.post('/auth/register', { username, email, password });
+    const data = await api.post('/auth/register', {
+      username: document.getElementById('reg-username').value,
+      email: document.getElementById('reg-email').value,
+      password: document.getElementById('reg-password').value
+    });
     setToken(data.token);
     currentUser = data.user;
     setUser(data.user);
