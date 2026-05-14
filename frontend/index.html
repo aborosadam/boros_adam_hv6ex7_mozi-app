@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoziJegy – Online Jegyfoglaló</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand" onclick="showPage('movies')">🎬 Mozi<span>Jegy</span></div>
+  <div class="navbar-nav" id="auth-area"></div>
+</nav>
+
+<!-- PAGE: MOVIES -->
+<div class="page active" id="page-movies">
+  <div class="hero">
+    <h1>Most játszó filmek</h1>
+    <p>Válassz filmet, foglalj jegyet percek alatt</p>
+  </div>
+  <div id="alert-movies"></div>
+  <div class="movies-grid" id="movies-grid">
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<!-- PAGE: MOVIE DETAIL -->
+<div class="page" id="page-detail">
+  <div id="movie-detail-content"></div>
+</div>
+
+<!-- PAGE: BOOKINGS -->
+<div class="page" id="page-bookings">
+  <h2 style="margin-bottom:8px">Foglalásaim</h2>
+  <p style="color:var(--text-muted);margin-bottom:20px">Aktív és korábbi jegyeid</p>
+  <div id="alert-bookings"></div>
+  <div class="bookings-list" id="bookings-list"></div>
+</div>
+
+<!-- PAGE: LOGIN -->
+<div class="page" id="page-login">
+  <div class="form-card">
+    <h2>Bejelentkezés</h2>
+    <p class="subtitle">Üdvözöljük vissza!</p>
+    <div id="alert-login" class="alert" style="display:none"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-email">Email cím</label>
+        <input type="email" id="login-email" placeholder="pelda@email.hu" required>
+      </div>
+      <div class="form-group">
+        <label for="login-password">Jelszó</label>
+        <input type="password" id="login-password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Bejelentkezés</button>
+    </form>
+    <p style="text-align:center;margin-top:16px;font-size:0.9rem;color:var(--text-muted)">
+      Még nincs fiókod?
+      <a href="#" onclick="showPage('register')" style="color:var(--primary)">Regisztráció</a>
+    </p>
+    <p style="text-align:center;margin-top:8px;font-size:0.8rem;color:var(--text-muted)">
+      Admin: admin@mozi.hu / admin123
+    </p>
+  </div>
+</div>
+
+<!-- PAGE: REGISTER -->
+<div class="page" id="page-register">
+  <div class="form-card">
+    <h2>Regisztráció</h2>
+    <p class="subtitle">Hozz létre egy fiókot a jegyvásárláshoz</p>
+    <div id="alert-register" class="alert" style="display:none"></div>
+    <form id="register-form">
+      <div class="form-group">
+        <label for="reg-username">Felhasználónév</label>
+        <input type="text" id="reg-username" placeholder="felhasznalonev" required>
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email cím</label>
+        <input type="email" id="reg-email" placeholder="pelda@email.hu" required>
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Jelszó (min. 6 karakter)</label>
+        <input type="password" id="reg-password" placeholder="••••••••" minlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Fiók létrehozása</button>
+    </form>
+    <p style="text-align:center;margin-top:16px;font-size:0.9rem;color:var(--text-muted)">
+      Már van fiókod?
+      <a href="#" onclick="showPage('login')" style="color:var(--primary)">Bejelentkezés</a>
+    </p>
+  </div>
+</div>
+
+<!-- SEAT PICKER OVERLAY -->
+<div id="seat-picker-overlay" style="display:none" class="seat-picker-overlay">
+  <div class="seat-picker-modal">
+    <h3 id="seat-picker-title">Ülőhely választás</h3>
+    <p class="subtitle">Kattints a kívánt székekre (max. 10)</p>
+    <div id="seat-picker-error" class="alert alert-error" style="display:none"></div>
+
+    <div class="screen-label">VÁSZON</div>
+    <div class="screen-indicator"></div>
+
+    <div class="seat-legend">
+      <div class="legend-item"><div class="legend-dot free"></div><span>Szabad</span></div>
+      <div class="legend-item"><div class="legend-dot selected"></div><span>Kiválasztott</span></div>
+      <div class="legend-item"><div class="legend-dot taken"></div><span>Foglalt</span></div>
+    </div>
+
+    <div class="seats-grid" id="seats-grid"></div>
+
+    <div class="booking-summary">
+      <div class="row"><span>Kiválasztott jegyek:</span><span id="selected-count">0 db</span></div>
+      <div class="row"><span>Székek:</span><span id="seats-list">–</span></div>
+      <div class="row total"><span>Összesen:</span><span id="total-price">0 Ft</span></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSeatPicker()">Mégse</button>
+      <button class="btn btn-primary" id="confirm-booking-btn" disabled>Foglalás megerősítése</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

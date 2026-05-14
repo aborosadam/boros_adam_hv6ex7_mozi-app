@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: mozijegy-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - mozi-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_PATH=/app/data/mozi.db
+      - JWT_SECRET=mozi_jwt_secret_csere_meg_production_ban
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mozi-data:
+    driver: local
