@@ -42,11 +42,11 @@ CREATE TABLE IF NOT EXISTS bookings (
 );
 
 INSERT OR IGNORE INTO movies (id, title, description, genre, duration_min, poster_url) VALUES
-(1, 'Dune: Part Two', 'Paul Atreides egyesíti a Fremenekkel és bosszút áll a Harkonnenek ellen.', 'Sci-Fi', 166, 'https://upload.wikimedia.org/wikipedia/en/8/8e/Dune_Part_Two_poster.jpeg'),
-(2, 'Oppenheimer', 'Az atommodabomba atyjának lenyűgöző életrajzi drámája.', 'Dráma', 180, 'https://upload.wikimedia.org/wikipedia/en/4/4a/Oppenheimer_%28film%29.jpg'),
-(3, 'Godzilla x Kong', 'Két titán szövetsége egy mélyebb fenyegetéssel szemben.', 'Akció', 115, 'https://upload.wikimedia.org/wikipedia/en/9/9f/Godzilla_x_Kong_The_New_Empire_poster.jpg'),
-(4, 'Wonka', 'A fiatal Willy Wonka kalandjai a csokoládé birodalom kezdeteinél.', 'Kaland', 116, 'https://upload.wikimedia.org/wikipedia/en/c/c3/Wonka_%28film%29_poster.jpg'),
-(5, 'Furiosa', 'Mad Max előzménye: Furiosa eredettörténete az apokaliptikus sivatagban.', 'Akció', 148, 'https://upload.wikimedia.org/wikipedia/en/4/41/Furiosa_A_Mad_Max_Saga_poster.jpg');
+(1, 'Dune: Part Two', 'Paul Atreides egyesíti a Fremenekkel és bosszút áll a Harkonnenek ellen.', 'Sci-Fi', 166, 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg'),
+(2, 'Oppenheimer', 'Az atommodabomba atyjának lenyűgöző életrajzi drámája.', 'Dráma', 180, 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg'),
+(3, 'Godzilla x Kong', 'Két titán szövetsége egy mélyebb fenyegetéssel szemben.', 'Akció', 115, 'https://image.tmdb.org/t/p/w500/z1p34vh7dEOnLDmyCrlUVLuoDzd.jpg'),
+(4, 'Wonka', 'A fiatal Willy Wonka kalandjai a csokoládé birodalom kezdeteinél.', 'Kaland', 116, 'https://image.tmdb.org/t/p/w600_and_h900_face/s875cUCzNhc965uSpAhw2UCl9SN.jpg'),
+(5, 'Furiosa', 'Mad Max előzménye: Furiosa eredettörténete az apokaliptikus sivatagban.', 'Akció', 148, 'https://image.tmdb.org/t/p/w500/iADOJ8Zymht2JPMoy3R7xceZprc.jpg');
 
 INSERT OR IGNORE INTO screenings (id, movie_id, screening_time, hall, total_seats, available_seats, price) VALUES
 (1,  1, datetime('now', '+1 day', 'start of day', '+10 hours'), '1-es terem', 80, 80, 1800),
