@@ -2,7 +2,7 @@
 
 **Tantárgy:** Webprogramozás alapjai (WEBPRO-T-LA01)  
 **Projekt:** Projekt 10 – Online jegyfoglaló rendszer mozik számára  
-**Elevator Pitch videó:**   
+**Github Link:** https://github.com/aborosadam/boros_adam_hv6ex7_mozi-app
 
 ---
 
@@ -91,8 +91,8 @@ Előfeltétel: Docker és Docker Compose telepítve.
 
 ```bash
 # 1. A projekt kicsomagolása
-unzip mozi-app.zip
-cd mozi-app
+unzip boros_adam_hv6ex7_mozi-app.zip
+cd boros_adam_hv6ex7_mozi-app
 
 # 2. Alkalmazás indítása
 docker-compose up --build
@@ -113,7 +113,7 @@ Előfeltétel: Node.js 18+
 
 ```bash
 # 1. Függőségek telepítése
-cd mozi-app/backend
+cd boros_adam_hv6ex7_mozi-app/backend
 npm install
 
 # 2. Szerver indítása
@@ -126,7 +126,7 @@ npm start
 ### Tesztek futtatása
 
 ```bash
-cd mozi-app/backend
+cd boros_adam_hv6ex7_mozi-app/backend
 npm install
 npm test
 ```
