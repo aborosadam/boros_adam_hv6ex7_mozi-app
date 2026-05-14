@@ -3,6 +3,7 @@
 **Tantárgy:** Webprogramozás alapjai (WEBPRO-T-LA01)  
 **Projekt:** Projekt 10 – Online jegyfoglaló rendszer mozik számára  
 **Github Link:** https://github.com/aborosadam/boros_adam_hv6ex7_mozi-app
+**Elevator Pitch videó:** https://gdfhu-my.sharepoint.com/:v:/g/personal/hv6ex7_neptun_gde_hu/IQBnyWRKnNo0QpI_a-2Z4c3mAQiaPhWZF7tlg4etK9aZQ0c?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=eAF2L4
 
 ---
 
